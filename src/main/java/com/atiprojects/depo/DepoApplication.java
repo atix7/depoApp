@@ -9,5 +9,7 @@ public class DepoApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(DepoApplication.class, args);
 	}
-
+	{
+		System.out.println("DepoApplication");
+			}
 }
