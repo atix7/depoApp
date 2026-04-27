@@ -1,6 +1,6 @@
 package com.atiprojects.depo.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
@@ -18,6 +18,6 @@ public class Category {
     private String name;
 
     @OneToMany(mappedBy = "category")
-    @JsonManagedReference
+    @JsonIgnoreProperties("category")
     private List<Product> products;
 }
