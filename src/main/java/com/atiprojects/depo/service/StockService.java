@@ -1,5 +1,7 @@
 package com.atiprojects.depo.service;
 
+import com.atiprojects.depo.dto.StockItemDTO;
+import com.atiprojects.depo.dto.StockMovementDTO;
 import com.atiprojects.depo.entity.*;
 import com.atiprojects.depo.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,24 +22,66 @@ public class StockService {
     private final WarehouseRepository warehouseRepository;
     private final UserRepository userRepository;
 
-    public List<StockItem> getStockByWarehouse(Long warehouseId) {
-        return stockItemRepository.findByWarehouseId(warehouseId);
+    private StockItemDTO toDTO(StockItem item) {
+        StockItemDTO dto = new StockItemDTO();
+        dto.setId(item.getId());
+        dto.setProductName(item.getProduct().getName());
+        dto.setProductSku(item.getProduct().getSku());
+        dto.setQuantity(item.getQuantity());
+        dto.setWarehouseId(item.getWarehouse().getId());
+        dto.setWarehouseName(item.getWarehouse().getName());
+        return dto;
     }
 
-    public List<StockItem> getStockByProduct(Long productId) {
-        return stockItemRepository.findByProductId(productId);
+    // A listázó metódus már DTO-t ad vissza
+    public List<StockItemDTO> getByWarehouse(Long warehouseId) {
+        List<StockItem> items = stockItemRepository.findByWarehouseId(warehouseId);
+        return items.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public List<StockMovement> getMovementsByProduct(Long productId) {
-        return stockMovementRepository.findByProductId(productId);
+    public List<StockItemDTO> getStockByWarehouse(Long warehouseId) {
+        return stockItemRepository.findByWarehouseId(warehouseId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public List<StockMovement> getMovementsByDateRange(LocalDateTime from, LocalDateTime to) {
-        return stockMovementRepository.findByCreatedAtBetween(from, to);
+    public List<StockItemDTO> getStockByProduct(Long productId) {
+        return stockItemRepository.findByProductId(productId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<StockMovementDTO> getMovementsByProduct(Long productId) {
+        return stockMovementRepository.findByProductId(productId).stream()
+                .map(this::toMovementDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<StockMovementDTO> getMovementsByDateRange(LocalDateTime from, LocalDateTime to) {
+        return stockMovementRepository.findByCreatedAtBetween(from, to).stream()
+                .map(this::toMovementDTO)
+                .collect(Collectors.toList());
+    }
+
+    private StockMovementDTO toMovementDTO(StockMovement m) {
+        StockMovementDTO dto = new StockMovementDTO();
+        dto.setId(m.getId());
+        dto.setProductId(m.getProduct().getId());
+        dto.setProductName(m.getProduct().getName());
+        dto.setWarehouseId(m.getWarehouse().getId());
+        dto.setWarehouseName(m.getWarehouse().getName());
+        dto.setUserId(m.getUser().getId());
+        dto.setType(m.getType());
+        dto.setQuantity(m.getQuantity());
+        dto.setCreatedAt(m.getCreatedAt());
+        dto.setNote(m.getNote());
+        return dto;
     }
 
     @Transactional
-    public StockMovement stockIn(Long productId, Long warehouseId, Long userId, Integer quantity, String note) {
+    public StockMovementDTO stockIn(Long productId, Long warehouseId, Long userId, Integer quantity, String note) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
 
@@ -64,11 +109,11 @@ public class StockService {
         movement.setCreatedAt(LocalDateTime.now());
         movement.setNote(note);
 
-        return stockMovementRepository.save(movement);
+        return toMovementDTO(stockMovementRepository.save(movement));
     }
 
     @Transactional
-    public StockMovement stockOut(Long productId, Long warehouseId, Long userId, Integer quantity, String note) {
+    public StockMovementDTO stockOut(Long productId, Long warehouseId, Long userId, Integer quantity, String note) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
 
@@ -98,6 +143,7 @@ public class StockService {
         movement.setCreatedAt(LocalDateTime.now());
         movement.setNote(note);
 
-        return stockMovementRepository.save(movement);
+        return toMovementDTO(stockMovementRepository.save(movement));
     }
+
 }
