@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Depo – Raktárkezelő</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- LOGIN OLDAL -->
+    <div id="login-page" class="page active">
+        <div class="login-bg">
+            <div class="login-grid"></div>
+        </div>
+        <div class="login-container">
+            <div class="login-brand">
+                <span class="brand-icon">▦</span>
+                <h1>DEPO</h1>
+                <p>Raktárkezelő rendszer</p>
+            </div>
+            <form class="login-form" id="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="admin@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Jelszó</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <div id="login-error" class="error-msg hidden">Hibás email vagy jelszó.</div>
+                <button type="submit" class="btn-primary" id="login-btn">
+                    <span class="btn-text">Bejelentkezés</span>
+                    <span class="btn-loader hidden">...</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard-page" class="page hidden">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-icon">▦</span>
+                <span>DEPO</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="overview">
+                    <span class="nav-icon">◈</span> Áttekintés
+                </a>
+                <a href="#" class="nav-item" data-page="products">
+                    <span class="nav-icon">◻</span> Termékek
+                </a>
+                <a href="#" class="nav-item" data-page="stock">
+                    <span class="nav-icon">◧</span> Készlet
+                </a>
+                <a href="#" class="nav-item" data-page="warehouses">
+                    <span class="nav-icon">◫</span> Raktárak
+                </a>
+                <a href="#" class="nav-item" data-page="categories">
+                    <span class="nav-icon">◱</span> Kategóriák
+                </a>
+                <a href="#" class="nav-item admin-only hidden" data-page="users">
+                    <span class="nav-icon">◉</span> Felhasználók
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <span class="user-avatar">◉</span>
+                    <div>
+                        <div id="sidebar-email" class="user-email">–</div>
+                        <div id="sidebar-role" class="user-role">–</div>
+                    </div>
+                </div>
+                <button class="btn-logout" id="logout-btn">Kilépés</button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <div id="toast" class="toast hidden"></div>
+
+            <!-- ÁTTEKINTÉS -->
+            <section id="section-overview" class="content-section active">
+                <div class="section-header">
+                    <h2>Áttekintés</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Termékek</div>
+                        <div class="stat-value" id="stat-products">–</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Raktárak</div>
+                        <div class="stat-value" id="stat-warehouses">–</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Kategóriák</div>
+                        <div class="stat-value" id="stat-categories">–</div>
+                    </div>
+                    <div class="stat-card warn">
+                        <div class="stat-label">Alacsony készlet</div>
+                        <div class="stat-value" id="stat-lowstock">–</div>
+                    </div>
+                </div>
+                <div class="section-header" style="margin-top:2rem">
+                    <h3>Alacsony készletű termékek</h3>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="lowstock-table">
+                        <thead>
+                            <tr>
+                                <th>Név</th>
+                                <th>SKU</th>
+                                <th>Készlet</th>
+                                <th>Min. készlet</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lowstock-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TERMÉKEK -->
+            <section id="section-products" class="content-section hidden">
+                <div class="section-header">
+                    <h2>Termékek</h2>
+                    <button class="btn-primary btn-sm" id="btn-add-product">+ Új termék</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="products-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Név</th>
+                                <th>SKU</th>
+                                <th>Ár</th>
+                                <th>Készlet</th>
+                                <th>Min.</th>
+                                <th>Kategória</th>
+                                <th>Műveletek</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- KÉSZLET -->
+            <section id="section-stock" class="content-section hidden">
+                <div class="section-header">
+                    <h2>Készlet mozgások</h2>
+                    <div class="btn-group">
+                        <button class="btn-primary btn-sm" id="btn-stock-in">+ Bevételezés</button>
+                        <button class="btn-danger btn-sm" id="btn-stock-out">– Kivételezés</button>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <label>Raktár szűrő:</label>
+                    <select id="stock-warehouse-filter">
+                        <option value="">– Összes –</option>
+                    </select>
+                    <button class="btn-secondary btn-sm" id="btn-filter-stock">Szűrés</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Termék</th>
+                                <th>SKU</th>
+                                <th>Raktár</th>
+                                <th>Készlet</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- RAKTÁRAK -->
+            <section id="section-warehouses" class="content-section hidden">
+                <div class="section-header">
+                    <h2>Raktárak</h2>
+                    <button class="btn-primary btn-sm" id="btn-add-warehouse">+ Új raktár</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Név</th>
+                                <th>Helyszín</th>
+                                <th>Műveletek</th>
+                            </tr>
+                        </thead>
+                        <tbody id="warehouses-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- KATEGÓRIÁK -->
+            <section id="section-categories" class="content-section hidden">
+                <div class="section-header">
+                    <h2>Kategóriák</h2>
+                    <button class="btn-primary btn-sm" id="btn-add-category">+ Új kategória</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Név</th>
+                                <th>Műveletek</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categories-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- FELHASZNÁLÓK -->
+            <section id="section-users" class="content-section hidden">
+                <div class="section-header">
+                    <h2>Felhasználók</h2>
+                    <button class="btn-primary btn-sm" id="btn-add-user">+ Új felhasználó</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Név</th>
+                                <th>Email</th>
+                                <th>Szerepkör</th>
+                                <th>Műveletek</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Modal</h3>
+                <button class="modal-close" id="modal-close">✕</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="modal-cancel">Mégse</button>
+                <button class="btn-primary" id="modal-confirm">Mentés</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/stock.js"></script>
+    <script src="js/warehouses.js"></script>
+    <script src="js/categories.js"></script>
+    <script src="js/users.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
