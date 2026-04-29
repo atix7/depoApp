@@ -6,6 +6,7 @@ import com.atiprojects.depo.service.StockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -44,19 +45,19 @@ public class StockController {
     public ResponseEntity<StockMovementDTO> stockIn(
             @RequestParam Long productId,
             @RequestParam Long warehouseId,
-            @RequestParam Long userId,
             @RequestParam Integer quantity,
-            @RequestParam(required = false) String note) {
-        return ResponseEntity.ok(stockService.stockIn(productId, warehouseId, userId, quantity, note));
+            @RequestParam(required = false) String note,
+            Authentication authentication) {
+        return ResponseEntity.ok(stockService.stockIn(productId, warehouseId, authentication.getName(), quantity, note));
     }
 
     @PostMapping("/out")
     public ResponseEntity<StockMovementDTO> stockOut(
             @RequestParam Long productId,
             @RequestParam Long warehouseId,
-            @RequestParam Long userId,
             @RequestParam Integer quantity,
-            @RequestParam(required = false) String note) {
-        return ResponseEntity.ok(stockService.stockOut(productId, warehouseId, userId, quantity, note));
+            @RequestParam(required = false) String note,
+            Authentication authentication) {
+        return ResponseEntity.ok(stockService.stockOut(productId, warehouseId, authentication.getName(), quantity, note));
     }
 }

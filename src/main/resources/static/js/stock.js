@@ -117,8 +117,7 @@ document.getElementById('btn-stock-in').addEventListener('click', async () => {
             return;
         }
         try {
-            const userId = await getCurrentUserId();
-            await api.stockIn(productId, warehouseId, userId, quantity, note);
+            await api.stockIn(productId, warehouseId, quantity, note);
             closeModal();
             showToast('Bevételezés sikeres!');
             await loadStock();
@@ -139,8 +138,7 @@ document.getElementById('btn-stock-out').addEventListener('click', async () => {
             return;
         }
         try {
-            const userId = await getCurrentUserId();
-            await api.stockOut(productId, warehouseId, userId, quantity, note);
+            await api.stockOut(productId, warehouseId, quantity, note);
             closeModal();
             showToast('Kivételezés sikeres!');
             await loadStock();
@@ -153,8 +151,3 @@ document.getElementById('btn-stock-out').addEventListener('click', async () => {
     });
 });
 
-// Bejelentkezett user ID-jének lekérése email alapján
-async function getCurrentUserId() {
-    const me = await apiFetch('/auth/me');
-    return me.id;
-}

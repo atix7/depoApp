@@ -103,8 +103,7 @@ async function quickStockIn(productId) {
             return;
         }
         try {
-            const me = await apiFetch('/auth/me');
-            await api.stockIn(productId, warehouseId, me.id, quantity, note);
+            await api.stockIn(productId, warehouseId, quantity, note);
             closeModal();
             showToast('Bevételezés sikeres!');
             loadOverview();

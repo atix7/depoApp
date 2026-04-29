@@ -6,20 +6,17 @@ const API_BASE = 'http://localhost:8080';
 
 // ---- Token kezelés ----
 const Auth = {
-    getToken()  { return localStorage.getItem('jwt_token'); },
     getEmail()  { return localStorage.getItem('jwt_email'); },
     getRole()   { return localStorage.getItem('jwt_role'); },
     isAdmin()   { return Auth.getRole() === 'ROLE_ADMIN'; },
-    isLoggedIn(){ return !!Auth.getToken(); },
+    isLoggedIn(){ return !!Auth.getEmail(); },
 
-    save(token, email, role) {
-        localStorage.setItem('jwt_token', token);
+    save(email, role) {
         localStorage.setItem('jwt_email', email);
         localStorage.setItem('jwt_role', role);
     },
 
     clear() {
-        localStorage.removeItem('jwt_token');
         localStorage.removeItem('jwt_email');
         localStorage.removeItem('jwt_role');
     }
@@ -27,17 +24,15 @@ const Auth = {
 
 // ---- Alap fetch wrapper ----
 async function apiFetch(path, options = {}) {
-    const token = Auth.getToken();
-
     const headers = {
         'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         ...(options.headers || {})
     };
 
     const response = await fetch(`${API_BASE}${path}`, {
         ...options,
-        headers
+        headers,
+        credentials: 'include'
     });
 
     if (response.status === 401) {
@@ -92,10 +87,10 @@ const api = {
     // Készlet
     getStockByWarehouse: (wId) => apiFetch(`/stock/warehouse/${wId}`),
     getStockByProduct:   (pId) => apiFetch(`/stock/product/${pId}`),
-    stockIn:  (productId, warehouseId, userId, quantity, note) =>
-        apiFetch(`/stock/in?productId=${productId}&warehouseId=${warehouseId}&userId=${userId}&quantity=${quantity}${note ? '&note=' + encodeURIComponent(note) : ''}`, { method: 'POST' }),
-    stockOut: (productId, warehouseId, userId, quantity, note) =>
-        apiFetch(`/stock/out?productId=${productId}&warehouseId=${warehouseId}&userId=${userId}&quantity=${quantity}${note ? '&note=' + encodeURIComponent(note) : ''}`, { method: 'POST' }),
+    stockIn:  (productId, warehouseId, quantity, note) =>
+        apiFetch(`/stock/in?productId=${productId}&warehouseId=${warehouseId}&quantity=${quantity}${note ? '&note=' + encodeURIComponent(note) : ''}`, { method: 'POST' }),
+    stockOut: (productId, warehouseId, quantity, note) =>
+        apiFetch(`/stock/out?productId=${productId}&warehouseId=${warehouseId}&quantity=${quantity}${note ? '&note=' + encodeURIComponent(note) : ''}`, { method: 'POST' }),
 
     // Felhasználók (csak ADMIN)
     getUsers:     ()     => apiFetch('/users'),

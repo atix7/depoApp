@@ -47,7 +47,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 
     try {
         const data = await api.login(email, password);
-        Auth.save(data.token, data.email, data.role);
+        Auth.save(data.email, data.role);
         showDashboard();
     } catch (err) {
         errorEl.classList.remove('hidden');
@@ -58,7 +58,8 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 });
 
 // Logout
-document.getElementById('logout-btn').addEventListener('click', () => {
+document.getElementById('logout-btn').addEventListener('click', async () => {
+    await apiFetch('/auth/logout', { method: 'POST' }).catch(() => {});
     Auth.clear();
     showLogin();
 });

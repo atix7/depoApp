@@ -81,15 +81,15 @@ public class StockService {
     }
 
     @Transactional
-    public StockMovementDTO stockIn(Long productId, Long warehouseId, Long userId, Integer quantity, String note) {
+    public StockMovementDTO stockIn(Long productId, Long warehouseId, String email, Integer quantity, String note) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
 
         Warehouse warehouse = warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new RuntimeException("Warehouse not found: " + warehouseId));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
         StockItem stockItem = stockItemRepository
                 .findByProductIdAndWarehouseId(productId, warehouseId)
@@ -115,15 +115,15 @@ public class StockService {
     }
 
     @Transactional
-    public StockMovementDTO stockOut(Long productId, Long warehouseId, Long userId, Integer quantity, String note) {
+    public StockMovementDTO stockOut(Long productId, Long warehouseId, String email, Integer quantity, String note) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
 
         Warehouse warehouse = warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new RuntimeException("Warehouse not found: " + warehouseId));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
         StockItem stockItem = stockItemRepository
                 .findByProductIdAndWarehouseId(productId, warehouseId)
