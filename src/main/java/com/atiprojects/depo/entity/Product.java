@@ -26,9 +26,6 @@ public class Product {
     private Double price;
 
     @Column(nullable = false)
-    private Integer quantity;
-
-    @Column(nullable = false)
     private Integer minStock;
 
     @ManyToOne

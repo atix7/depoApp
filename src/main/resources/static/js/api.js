@@ -40,7 +40,7 @@ async function apiFetch(path, options = {}) {
         headers
     });
 
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 403) {
         Auth.clear();
         showLogin();
         throw new Error('Unauthorized – bejelentkezés szükséges');

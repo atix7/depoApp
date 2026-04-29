@@ -20,16 +20,13 @@ async function loadProducts() {
 function renderProductsTable(products) {
     const tbody = document.getElementById('products-tbody');
     tbody.innerHTML = products.length === 0
-        ? '<tr><td colspan="8" style="text-align:center;color:var(--text-muted)">Nincs termék</td></tr>'
+        ? '<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">Nincs termék</td></tr>'
         : products.map(p => `
             <tr>
                 <td style="font-family:var(--font-mono);font-size:0.8rem">${p.id}</td>
                 <td>${p.name}</td>
                 <td style="font-family:var(--font-mono);font-size:0.8rem">${p.sku}</td>
                 <td>${p.price?.toLocaleString('hu-HU')} Ft</td>
-                <td style="color:${p.quantity <= p.minStock ? 'var(--danger)' : 'var(--success)'}">
-                    ${p.quantity}
-                </td>
                 <td>${p.minStock}</td>
                 <td>${p.category?.name ?? '–'}</td>
                 <td>
@@ -65,10 +62,6 @@ function productFormHTML(p = {}) {
             <input type="number" id="f-price" value="${p.price ?? ''}" placeholder="0">
         </div>
         <div class="form-group">
-            <label>Készlet</label>
-            <input type="number" id="f-quantity" value="${p.quantity ?? ''}" placeholder="0">
-        </div>
-        <div class="form-group">
             <label>Min. készlet</label>
             <input type="number" id="f-minstock" value="${p.minStock ?? ''}" placeholder="0">
         </div>
@@ -85,7 +78,6 @@ function getFormData() {
         sku:         document.getElementById('f-sku').value.trim(),
         description: document.getElementById('f-description').value.trim(),
         price:       parseFloat(document.getElementById('f-price').value),
-        quantity:    parseInt(document.getElementById('f-quantity').value),
         minStock:    parseInt(document.getElementById('f-minstock').value),
         category: {
             id: parseInt(document.getElementById('f-category').value)

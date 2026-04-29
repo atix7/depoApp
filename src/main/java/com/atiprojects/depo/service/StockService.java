@@ -100,6 +100,8 @@ public class StockService {
         stockItem.setQuantity(stockItem.getQuantity() == null ? quantity : stockItem.getQuantity() + quantity);
         stockItemRepository.save(stockItem);
 
+        productRepository.save(product);
+
         StockMovement movement = new StockMovement();
         movement.setProduct(product);
         movement.setWarehouse(warehouse);
@@ -134,6 +136,8 @@ public class StockService {
         stockItem.setQuantity(stockItem.getQuantity() - quantity);
         stockItemRepository.save(stockItem);
 
+        productRepository.save(product);
+
         StockMovement movement = new StockMovement();
         movement.setProduct(product);
         movement.setWarehouse(warehouse);
@@ -145,5 +149,4 @@ public class StockService {
 
         return toMovementDTO(stockMovementRepository.save(movement));
     }
-
 }

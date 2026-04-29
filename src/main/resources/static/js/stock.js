@@ -48,26 +48,30 @@ function renderStockTable(items) {
 }
 
 // Szűrés gomb
-document.getElementById('btn-filter-stock').addEventListener('click', async () => {
-    const warehouseId = document.getElementById('stock-warehouse-filter').value;
-    if (!warehouseId) {
-        showToast('Válassz raktárt a szűréshez', 'error');
-        return;
-    }
+document.getElementById('stock-warehouse-filter').addEventListener('change', async (e) => {
+    const warehouseId = e.target.value;
+    if (!warehouseId) return;
     await loadStockByWarehouse(warehouseId);
 });
 
 // Bevételezés / Kivételezés közös form
-function stockMovementFormHTML(type) {
-    const productOptions = '<option value="">– Válassz terméket –</option>';
+// Bevételezés / Kivételezés közös form
+async function stockMovementFormHTML(type) {
+    const products = await api.getProducts();
+    const productOptions = products.map(p =>
+        `<option value="${p.id}">${p.name} (${p.sku})</option>`
+    ).join('');
     const warehouseOptions = warehousesList.map(w =>
         `<option value="${w.id}">${w.name}</option>`
     ).join('');
 
     return `
         <div class="form-group">
-            <label>Termék ID</label>
-            <input type="number" id="f-s-productid" placeholder="Termék ID-je">
+            <label>Termék</label>
+            <select id="f-s-productid">
+                <option value="">– Válassz terméket –</option>
+                ${productOptions}
+            </select>
         </div>
         <div class="form-group">
             <label>Raktár</label>
@@ -90,7 +94,6 @@ function stockMovementFormHTML(type) {
         </p>` : ''}
     `;
 }
-
 function getStockFormData() {
     return {
         productId:   parseInt(document.getElementById('f-s-productid').value),
@@ -101,8 +104,9 @@ function getStockFormData() {
 }
 
 // Bevételezés
-document.getElementById('btn-stock-in').addEventListener('click', () => {
-    openModal('Bevételezés', stockMovementFormHTML('IN'), async () => {
+document.getElementById('btn-stock-in').addEventListener('click', async () => {
+    const formHTML = await stockMovementFormHTML('IN');
+    openModal('Bevételezés', formHTML, async () => {
         const { productId, warehouseId, quantity, note } = getStockFormData();
         if (!productId || !warehouseId || !quantity) {
             showToast('Töltsd ki az összes mezőt!', 'error');
@@ -120,9 +124,11 @@ document.getElementById('btn-stock-in').addEventListener('click', () => {
     });
 });
 
+
 // Kivételezés
-document.getElementById('btn-stock-out').addEventListener('click', () => {
-    openModal('Kivételezés', stockMovementFormHTML('OUT'), async () => {
+document.getElementById('btn-stock-out').addEventListener('click', async () => {
+    const formHTML = await stockMovementFormHTML('OUT');
+    openModal('Kivételezés', formHTML, async () => {
         const { productId, warehouseId, quantity, note } = getStockFormData();
         if (!productId || !warehouseId || !quantity) {
             showToast('Töltsd ki az összes mezőt!', 'error');
@@ -135,16 +141,16 @@ document.getElementById('btn-stock-out').addEventListener('click', () => {
             showToast('Kivételezés sikeres!');
             await loadStock();
         } catch (err) {
-            showToast('Hiba: ' + err.message, 'error');
+            const msg = err.message.includes('Insufficient stock')
+                ? 'Nincs elég készlet a kivételezéshez!'
+                : 'Hiba: ' + err.message;
+            showToast(msg, 'error');
         }
     });
 });
 
 // Bejelentkezett user ID-jének lekérése email alapján
 async function getCurrentUserId() {
-    const users = await api.getUsers();
-    const email = Auth.getEmail();
-    const user = users.find(u => u.email === email);
-    if (!user) throw new Error('Nem található a felhasználó');
-    return user.id;
+    const me = await apiFetch('/auth/me');
+    return me.id;
 }

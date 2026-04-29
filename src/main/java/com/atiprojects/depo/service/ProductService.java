@@ -1,9 +1,12 @@
 package com.atiprojects.depo.service;
 
+import com.atiprojects.depo.dto.LowStockProductDTO;
 import com.atiprojects.depo.entity.Category;
 import com.atiprojects.depo.entity.Product;
+import com.atiprojects.depo.entity.StockItem;
 import com.atiprojects.depo.repository.CategoryRepository;
 import com.atiprojects.depo.repository.ProductRepository;
+import com.atiprojects.depo.repository.StockItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final StockItemRepository stockItemRepository;
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();
@@ -34,9 +38,16 @@ public class ProductService {
         return productRepository.findByCategory_Id(categoryId);
     }
 
-    public List<Product> getLowStockProducts() {
+    public List<LowStockProductDTO> getLowStockProducts() {
         return productRepository.findAll().stream()
-                .filter(p -> p.getQuantity() <= p.getMinStock())
+                .map(p -> {
+                    int total = stockItemRepository.findByProductId(p.getId())
+                            .stream()
+                            .mapToInt(StockItem::getQuantity)
+                            .sum();
+                    return new LowStockProductDTO(p.getId(), p.getName(), p.getSku(), total, p.getMinStock());
+                })
+                .filter(dto -> dto.getQuantity() <= dto.getMinStock())
                 .toList();
     }
 
@@ -53,7 +64,6 @@ public class ProductService {
         existing.setSku(updated.getSku());
         existing.setDescription(updated.getDescription());
         existing.setPrice(updated.getPrice());
-        existing.setQuantity(updated.getQuantity());
         existing.setMinStock(updated.getMinStock());
         existing.setCategory(updated.getCategory());
         return productRepository.save(existing);

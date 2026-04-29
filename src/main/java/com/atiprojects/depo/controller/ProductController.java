@@ -1,5 +1,6 @@
 package com.atiprojects.depo.controller;
 
+import com.atiprojects.depo.dto.LowStockProductDTO;
 import com.atiprojects.depo.entity.Product;
 import com.atiprojects.depo.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class ProductController {
     }
 
     @GetMapping("/low-stock")
-    public ResponseEntity<List<Product>> getLowStockProducts() {
+    public ResponseEntity<List<LowStockProductDTO>> getLowStockProducts() {
         return ResponseEntity.ok(productService.getLowStockProducts());
     }
 

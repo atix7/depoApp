@@ -28,7 +28,7 @@ function showDashboard() {
     });
 
     // Áttekintő oldal betöltése
-    loadOverview();
+    navigateTo('overview');
 }
 
 // Login form submit
@@ -65,7 +65,13 @@ document.getElementById('logout-btn').addEventListener('click', () => {
 
 // Oldal betöltéskor ellenőrzés
 if (Auth.isLoggedIn()) {
-    showDashboard();
+    // Token érvényességének ellenőrzése
+    apiFetch('/auth/me')
+        .then(() => showDashboard())
+        .catch(() => {
+            Auth.clear();
+            showLogin();
+        });
 } else {
     showLogin();
 }
