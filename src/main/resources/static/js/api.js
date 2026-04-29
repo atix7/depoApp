@@ -2,7 +2,7 @@
 // api.js – Központi fetch helper + token kezelés
 // =========================================
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 // ---- Token kezelés ----
 const Auth = {
