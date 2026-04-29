@@ -57,14 +57,59 @@ async function loadOverview() {
         tbody.innerHTML = lowStock.length === 0
             ? '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Nincs alacsony készletű termék ✓</td></tr>'
             : lowStock.map(p => `
-                <tr>
-                    <td>${p.name}</td>
-                    <td style="font-family:var(--font-mono);font-size:0.8rem">${p.sku}</td>
-                    <td style="color:var(--danger);font-weight:600">${p.quantity}</td>
-                    <td>${p.minStock}</td>
-                </tr>
-            `).join('');
+    <tr>
+        <td>${p.name}</td>
+        <td style="font-family:var(--font-mono);font-size:0.8rem">${p.sku}</td>
+        <td style="color:var(--danger);font-weight:600">${p.quantity}</td>
+        <td>${p.minStock}</td>
+        <td>
+            <button class="btn-primary btn-sm" onclick="quickStockIn(${p.id})">+ Bevételezés</button>
+        </td>
+    </tr>
+`).join('');
     } catch (err) {
         console.error('Áttekintés betöltési hiba:', err);
     }
+}
+async function quickStockIn(productId) {
+    const warehouses = await api.getWarehouses();
+    const warehouseOptions = warehouses.map(w =>
+        `<option value="${w.id}">${w.name}</option>`
+    ).join('');
+
+    openModal('Bevételezés', `
+        <div class="form-group">
+            <label>Raktár</label>
+            <select id="f-s-warehouseid">
+                <option value="">– Válassz raktárt –</option>
+                ${warehouseOptions}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Mennyiség</label>
+            <input type="number" id="f-s-quantity" placeholder="0" min="1">
+        </div>
+        <div class="form-group">
+            <label>Megjegyzés (opcionális)</label>
+            <input type="text" id="f-s-note" placeholder="pl. Szállítólevél #123">
+        </div>
+    `, async () => {
+        const warehouseId = parseInt(document.getElementById('f-s-warehouseid').value);
+        const quantity = parseInt(document.getElementById('f-s-quantity').value);
+        const note = document.getElementById('f-s-note').value.trim();
+
+        if (!warehouseId || !quantity) {
+            showToast('Töltsd ki az összes mezőt!', 'error');
+            return;
+        }
+        try {
+            const me = await apiFetch('/auth/me');
+            await api.stockIn(productId, warehouseId, me.id, quantity, note);
+            closeModal();
+            showToast('Bevételezés sikeres!');
+            loadOverview();
+        } catch (err) {
+            showToast('Hiba: ' + err.message, 'error');
+        }
+    });
 }

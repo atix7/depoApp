@@ -55,14 +55,18 @@ document.getElementById('stock-warehouse-filter').addEventListener('change', asy
 });
 
 // Bevételezés / Kivételezés közös form
-// Bevételezés / Kivételezés közös form
 async function stockMovementFormHTML(type) {
     const products = await api.getProducts();
     const productOptions = products.map(p =>
         `<option value="${p.id}">${p.name} (${p.sku})</option>`
     ).join('');
-    const warehouseOptions = warehousesList.map(w =>
+    /*const warehouseOptions = warehousesList.map(w =>
         `<option value="${w.id}">${w.name}</option>`
+    ).join('');*/
+    const currentWarehouseId = document.getElementById('stock-warehouse-filter').value;
+
+    const warehouseOptions = warehousesList.map(w =>
+        `<option value="${w.id}" ${w.id == currentWarehouseId ? 'selected' : ''}>${w.name}</option>`
     ).join('');
 
     return `
