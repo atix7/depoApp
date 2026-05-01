@@ -73,12 +73,16 @@ function productFormHTML(p = {}) {
 }
 
 function getFormData() {
+    const price    = parseFloat(document.getElementById('f-price').value);
+    const minStock = parseInt(document.getElementById('f-minstock').value);
+
     return {
         name:        document.getElementById('f-name').value.trim(),
         sku:         document.getElementById('f-sku').value.trim(),
         description: document.getElementById('f-description').value.trim(),
-        price:       parseFloat(document.getElementById('f-price').value),
-        minStock:    parseInt(document.getElementById('f-minstock').value),
+        price:       isNaN(price)    ? 0.0 : price,
+        quantity:    isNaN(quantity) ? 0   : quantity,
+        minStock:    isNaN(minStock) ? 0   : minStock,
         category: {
             id: parseInt(document.getElementById('f-category').value)
         }

@@ -55,6 +55,8 @@ public class ProductService {
         Category category = categoryRepository.findById(product.getCategory().getId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         product.setCategory(category);
+        if (product.getMinStock() == null) product.setMinStock(0);
+        if (product.getPrice() == null) product.setPrice(0.0);
         return productRepository.save(product);
     }
 
